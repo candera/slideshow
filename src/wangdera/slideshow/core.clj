@@ -5,7 +5,8 @@
 	   (javax.imageio ImageIO)
 	   (javax.swing JFrame JPanel Timer)
 	   (java.awt Dimension Frame Color)
-	   (java.awt.event ActionListener WindowAdapter KeyAdapter KeyEvent)))
+	   (java.awt.event ActionListener WindowAdapter KeyAdapter KeyEvent))
+  (:gen-class))
 
 (import-static java.awt.event.KeyEvent VK_LEFT VK_RIGHT VK_SPACE VK_PAUSE)
 
@@ -205,3 +206,6 @@
     (add-watch current-time ::slideshow (fn [k r n o] (handle-time-change)))
     (add-watch image-cursor ::slideshow (fn [k r n o] (.repaint panel)))
     frame))
+
+(defn -main [& args]
+  (slideshow (first args)))
