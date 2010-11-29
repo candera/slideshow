@@ -187,25 +187,34 @@
     (.start thread)
     thread))
 
-(defn slideshow [dir]
-  (start-imagelist-population dir)
-  (let [frame (make-frame)
-	panel (make-panel)
-	timer (make-timer panel)]
-    (doto frame 
-      ; EXIT_ON_CLOSE is problematic when running at the REPL
-      ;(.setDefaultCloseOperation JFrame/EXIT_ON_CLOSE)
-      (.addWindowListener (make-window-listener timer))
-      (.setExtendedState Frame/MAXIMIZED_BOTH)
-      (.setUndecorated true)
-      (.pack)
-      (.show)
-      (.add panel)
-      (.addKeyListener (make-key-listener)))
-    (.start timer)
-    (add-watch current-time ::slideshow (fn [k r n o] (handle-time-change)))
-    (add-watch image-cursor ::slideshow (fn [k r n o] (.repaint panel)))
-    frame))
+(defn slideshow
+  ([target] (slideshow target false))
+  ([target exit-on-close]
+     (start-imagelist-population target)
+     (let [frame (make-frame)
+	   panel (make-panel)
+	   timer (make-timer panel)]
+       (doto frame 
+	 ;; EXIT_ON_CLOSE is problematic when running at the REPL
+	 (.setDefaultCloseOperation
+	  (if exit-on-close
+	    JFrame/EXIT_ON_CLOSE
+	    JFrame/DISPOSE_ON_CLOSE))
+	 (.addWindowListener (make-window-listener timer))
+	 (.setExtendedState Frame/MAXIMIZED_BOTH)
+	 (.setUndecorated true)
+	 (.pack)
+	 (.show)
+	 (.add panel)
+	 (.addKeyListener (make-key-listener)))
+       (.start timer)
+       (add-watch current-time ::slideshow
+		  (fn [k r n o] (handle-time-change)))
+       (add-watch image-cursor ::slideshow
+		  (fn [k r n o] (.repaint panel)))
+       frame)))
 
 (defn -main [& args]
-  (slideshow (first args)))
+  (if (= 1 (count args))
+    (slideshow (first args) true)
+    (println "Usage: slideshow <target>")))
