@@ -14,7 +14,6 @@ FIXME: write
 
 ## TODO
 
-* Fix the fact that the app doesn't terminate.
 * Add indicators for when it's paused, rotation speed, etc.
 * Hide cursor
 * Add support for showing text from a file instead of just images
