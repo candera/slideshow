@@ -1,23 +1,36 @@
 (ns wangdera.slideshow.core
   (:use clojure.contrib.test-is
-	clojure.contrib.import-static)
+	clojure.contrib.import-static
+	[clojure.contrib.io :only [reader]])
   (:import (java.io File)
 	   (javax.imageio ImageIO)
 	   (javax.swing JFrame JPanel Timer)
 	   (java.awt Dimension Frame Color)
+	   (java.awt.image BufferedImage)
 	   (java.awt.event ActionListener WindowAdapter KeyAdapter KeyEvent))
   (:gen-class))
 
 (import-static java.awt.event.KeyEvent VK_LEFT VK_RIGHT VK_SPACE VK_PAUSE)
 
-(def image-path-list (atom []))
+(defprotocol Renderable
+  (draw [this]))
+
+(extend-protocol Renderable
+  java.io.File
+  (draw [this] (ImageIO/read this))
+  String
+  (draw [this]
+    (let [g (.createGraphics (BufferedImage. 500 500 BufferedImage/TYPE_INT_RGB))]
+      (.drawString g this 250 250))))
+
+(def items (atom []))
 (def rotation-rate (atom 12)) ; changes per minute
 (def current-time (atom 0))
 (def last-rotation (atom 0))
 (def paused (atom false))
-(def image-cursor (atom {:image-path-history []
-			 :current-image-index nil
-			 :current-image nil}))
+(def item-cursor (atom {:item-history []
+			:current-image-index nil
+			:current-image nil}))
 
 (def timer-granularity 100)
 
@@ -28,7 +41,7 @@
 
 (defn populate-imagelist [dir]
   (doseq [file (filter jpeg? (file-seq (File. dir)))]
-    (swap! image-path-list conj (.getPath file))))
+    (swap! items conj file)))
 
 (defn make-frame []
   (JFrame. "Slideshow"))
@@ -50,7 +63,7 @@
     [x y width height]))
 
 (defn current-image []
-  (:current-image @image-cursor))
+  (:current-image @item-cursor))
 
 (defn paint [g]
   (.setColor g Color/black)
@@ -69,18 +82,6 @@
       (doto g
 	(.setColor Color/white)
 	(.drawString "Working..." 800 600)))))
-
-(defn random-image-path []
-  (let [n (count @image-path-list)]
-    (if (= n 0)
-      nil
-      (@image-path-list (int (rand n))))))
-
-(defn random-image []
-  (if-let [image-path (random-image-path)]
-    (do 
-      ;(println "Loading image " image-path)
-      (ImageIO/read (File. image-path)))))
 
 (defn handle-timer-event [e panel]
   ;;   (println "Timer firing")
@@ -146,23 +147,23 @@
     coll))
 
 ;;; {:current-image #<image>
-;;;  :image-path-history [...]
+;;;  :item-history [...]
 ;;;  :current-image-index n}
-(defn move-image-cursor
-  ([cursor] (move-image-cursor cursor 1))
+(defn move-item-cursor
+  ([cursor] (move-item-cursor cursor 1))
   ([cursor n]
-     (let [{:keys [current-image image-path-history current-image-index]} cursor
+     (let [{:keys [current-image item-history current-image-index]} cursor
 	   next-index ((fnil + -1) current-image-index n)
-	   image-path-history (maybe-rand-conj image-path-history @image-path-list (inc next-index))]
-       {:current-image (ImageIO/read (File. (nth image-path-history next-index)))
-	:image-path-history image-path-history
+	   item-history (maybe-rand-conj item-history @items (inc next-index))]
+       {:current-image (draw (nth item-history next-index))
+	:item-history item-history
 	:current-image-index next-index})))
 
 (defn next-image []
-  (swap! image-cursor move-image-cursor))
+  (swap! item-cursor move-item-cursor))
 
 (defn rotate! []
-  (swap! image-cursor move-image-cursor)
+  (swap! item-cursor move-item-cursor)
   (reset! last-rotation @current-time))
 
 (defn handle-time-change []
@@ -187,10 +188,15 @@
     (.start thread)
     thread))
 
+(defn directory? [target]
+  (.isDirectory (File. target)))
+
 (defn slideshow
   ([target] (slideshow target false))
   ([target exit-on-close]
-     (start-imagelist-population target)
+     (if (directory? target)
+       (start-imagelist-population target)
+       (reset! items (vec (line-seq (reader target)))))
      (let [frame (make-frame)
 	   panel (make-panel)
 	   timer (make-timer panel)]
@@ -210,7 +216,7 @@
        (.start timer)
        (add-watch current-time ::slideshow
 		  (fn [k r n o] (handle-time-change)))
-       (add-watch image-cursor ::slideshow
+       (add-watch item-cursor ::slideshow
 		  (fn [k r n o] (.repaint panel)))
        frame)))
 
