@@ -5,7 +5,7 @@
   (:import (java.io File)
 	   (javax.imageio ImageIO)
 	   (javax.swing JFrame JPanel Timer)
-	   (java.awt Dimension Frame Color)
+	   (java.awt Dimension Frame Color Font)
 	   (java.awt.image BufferedImage)
 	   (java.awt.event ActionListener WindowAdapter KeyAdapter KeyEvent))
   (:gen-class))
@@ -15,13 +15,21 @@
 (defprotocol Renderable
   (draw [this]))
 
-(extend-protocol Renderable
-  java.io.File
-  (draw [this] (ImageIO/read this))
-  String
-  (draw [this]
-    (let [g (.createGraphics (BufferedImage. 500 500 BufferedImage/TYPE_INT_RGB))]
-      (.drawString g this 250 250))))
+(let [bigfont (Font. "Arial" Font/PLAIN 120)
+      image (BufferedImage. 500 500 BufferedImage/TYPE_INT_RGB)
+      g (.createGraphics image)]
+  (.setFont g bigfont)
+  (extend-protocol Renderable
+    java.io.File
+    (draw [this] (ImageIO/read this))
+    String
+    (draw [this]
+      (doto g
+	(.setColor Color/black)
+	(.fillRect 0 0 500 500)
+	(.setColor Color/white)
+	(.drawString this 250 250))
+      image)))
 
 (def items (atom []))
 (def rotation-rate (atom 12)) ; changes per minute
