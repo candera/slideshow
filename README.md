@@ -14,9 +14,9 @@ FIXME: write
 
 ## TODO
 
+* Adjust when resized or moved across monitors
 * Add indicators for when it's paused, rotation speed, etc.
 * Hide cursor
-* Add support for showing text from a file instead of just images
 
 ## License
 
