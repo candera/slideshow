@@ -14,9 +14,10 @@ FIXME: write
 
 ## TODO
 
+* Figure out why I'm suddenly unable to run it from the command-line
+* Adjust when resized or moved across monitors
 * Add indicators for when it's paused, rotation speed, etc.
 * Hide cursor
-* Add support for showing text from a file instead of just images
 
 ## License
 
