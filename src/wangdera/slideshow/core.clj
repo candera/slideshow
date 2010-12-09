@@ -7,7 +7,8 @@
 	   (javax.swing JFrame JPanel Timer)
 	   (java.awt Dimension Frame Color Font)
 	   (java.awt.image BufferedImage)
-	   (java.awt.event ActionListener WindowAdapter KeyAdapter KeyEvent))
+	   (java.awt.event ActionListener ComponentListener
+			   WindowAdapter KeyAdapter KeyEvent))
   (:gen-class))
 
 (import-static java.awt.event.KeyEvent VK_LEFT VK_RIGHT VK_SPACE VK_PAUSE)
@@ -184,6 +185,15 @@
     (keyReleased [e]) 
     (keyTyped [e] (invoke-from-map char-actions (.getKeyChar e)))))
 
+(defn make-component-listener []
+  (reify ComponentListener
+    (componentHidden [this e] (println "Frame Hidden"))
+    (componentMoved [this e] (println "Frame Moved"))
+    (componentResized [this e]
+      (let [c (.getComponent e)]
+	(println "Frame Resized to " (.getWidth c) "x" (.getHeight c))))
+    (componentShown [this e] (println "Frame Shown"))))
+
 (defn start-imagelist-population [dir]
   ;; Could have used future here, but it is better
   ;; to run with a low-pri thread because the CPU
@@ -220,7 +230,8 @@
 	 (.pack)
 	 (.show)
 	 (.add panel)
-	 (.addKeyListener (make-key-listener)))
+	 (.addKeyListener (make-key-listener))
+	 (.addComponentListener (make-component-listener)))
        (.start timer)
        (add-watch current-time ::slideshow
 		  (fn [k r n o] (handle-time-change)))
