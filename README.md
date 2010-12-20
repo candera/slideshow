@@ -17,6 +17,7 @@ FIXME: write
 * Adjust when resized or moved across monitors
 * Add indicators for when it's paused, rotation speed, etc.
 * Hide cursor
+* Center text in flashcard mode
 
 ## License
 
