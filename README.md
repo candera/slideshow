@@ -15,6 +15,7 @@ FIXME: write
 ## TODO
 
 * Adjust when resized or moved across monitors
+** This looks like it's working now - test it out on Lorien
 * Add indicators for when it's paused, rotation speed, etc.
 * Hide cursor
 
