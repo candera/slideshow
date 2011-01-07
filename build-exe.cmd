@@ -1,0 +1,1 @@
+launch4jc launch4j.cfg
