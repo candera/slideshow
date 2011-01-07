@@ -16,8 +16,8 @@ FIXME: write
 
 * Adjust when resized or moved across monitors
 ** This looks like it's working now - test it out on Lorien
+* Bind q and ESC to quit
 * Add indicators for when it's paused, rotation speed, etc.
-* Automate launch4j setup
 * Hide cursor after it stops moving for a few seconds
 
 ## License
