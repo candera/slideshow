@@ -15,8 +15,10 @@ FIXME: write
 ## TODO
 
 * Adjust when resized or moved across monitors
+** This looks like it's working now - test it out on Lorien
+* Bind q and ESC to quit
 * Add indicators for when it's paused, rotation speed, etc.
-* Hide cursor
+* Hide cursor after it stops moving for a few seconds
 * Center text in flashcard mode
 
 ## License
